@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Add New Todo{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h1>Create New Todo</h1>
+        <p>Add a new task to your todo list</p>
+    </div>
+
+    <form method="post" class="todo-form">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="title" class="form-label">Task Title *</label>
+            <input type="text" 
+                   id="title" 
+                   name="title" 
+                   class="form-input" 
+                   placeholder="Enter your task title"
+                   required>
+            <small class="form-help">Give your task a clear, descriptive title</small>
+        </div>
+
+        <div class="form-group">
+            <label for="description" class="form-label">Description</label>
+            <textarea id="description" 
+                      name="description" 
+                      class="form-textarea" 
+                      placeholder="Add more details about your task..."
+                      rows="5"></textarea>
+            <small class="form-help">Optional: Add additional details about this task</small>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="priority" class="form-label">Priority</label>
+                <select id="priority" name="priority" class="form-select">
+                    <option value="low">🟢 Low</option>
+                    <option value="medium" selected>🟡 Medium</option>
+                    <option value="high">🔴 High</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="due_date" class="form-label">Due Date</label>
+                <input type="datetime-local" 
+                       id="due_date" 
+                       name="due_date" 
+                       class="form-input">
+                <small class="form-help">Optional: Set a deadline for this task</small>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-lg">Create Todo</button>
+            <a href="{% url 'index' %}" class="btn btn-secondary btn-lg">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

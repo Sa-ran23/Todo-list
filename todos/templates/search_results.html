@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Search Results</h1>
+    {% if query %}
+    <p class="subtitle">Results for "{{ query }}"</p>
+    {% endif %}
+</div>
+
+{% if todos %}
+    <div class="todos-container">
+        {% for todo in todos %}
+        <div class="todo-card {% if todo.completed %}completed{% endif %} priority-{{ todo.priority }}">
+            <div class="todo-header">
+                <div class="todo-checkbox">
+                    <input type="checkbox" 
+                           {% if todo.completed %}checked{% endif %}
+                           onchange="toggleTodo({{ todo.id }})"
+                           id="todo-{{ todo.id }}">
+                    <label for="todo-{{ todo.id }}"></label>
+                </div>
+                <div class="todo-info">
+                    <h3 class="todo-title {% if todo.completed %}strike{% endif %}">{{ todo.title }}</h3>
+                    {% if todo.description %}
+                    <p class="todo-description">{{ todo.description|truncatewords:20 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="todo-meta">
+                <span class="priority-badge priority-{{ todo.priority }}">
+                    {% if todo.priority == 'high' %}🔴{% elif todo.priority == 'medium' %}🟡{% else %}🟢{% endif %}
+                    {{ todo.get_priority_display }}
+                </span>
+            </div>
+
+            <div class="todo-actions">
+                <a href="{% url 'edit_todo' todo.id %}" class="btn btn-edit">Edit</a>
+                <a href="{% url 'delete_todo' todo.id %}" class="btn btn-delete">Delete</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h2>No results found</h2>
+        <p>No todos match your search for "{{ query }}"</p>
+        <a href="{% url 'index' %}" class="btn btn-primary">Back to All Todos</a>
+    </div>
+{% endif %}
+
+<script>
+function toggleTodo(todoId) {
+    fetch(`/toggle/${todoId}/`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': '{{ csrf_token }}',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
+{% endblock %}

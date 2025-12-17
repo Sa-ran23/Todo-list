@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Todo List - Home{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>My Todo List</h1>
+    <p class="subtitle">Organize and track your tasks efficiently</p>
+</div>
+
+<div class="stats-container">
+    {% with total=todos|length completed=todos|dictsort:"completed"|last %}
+        {% if completed %}
+            {% with comp=completed|length %}
+                <div class="stat-card">
+                    <div class="stat-number">{{ comp }}</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            {% endwith %}
+        {% endif %}
+    {% endwith %}
+    <div class="stat-card">
+        <div class="stat-number">{{ todos|length }}</div>
+        <div class="stat-label">Total Tasks</div>
+    </div>
+</div>
+
+{% if todos %}
+    <div class="filter-buttons">
+        <a href="{% url 'index' %}" class="filter-btn active">All</a>
+        <a href="#" class="filter-btn" onclick="filterTodos('high')">High Priority</a>
+        <a href="#" class="filter-btn" onclick="filterTodos('medium')">Medium Priority</a>
+        <a href="#" class="filter-btn" onclick="filterTodos('low')">Low Priority</a>
+        <a href="#" class="filter-btn" onclick="filterTodos('completed')">Completed</a>
+    </div>
+
+    <div class="todos-container">
+        {% for todo in todos %}
+        <div class="todo-card {% if todo.completed %}completed{% endif %} priority-{{ todo.priority }}">
+            <div class="todo-header">
+                <div class="todo-checkbox">
+                    <input type="checkbox" 
+                           {% if todo.completed %}checked{% endif %}
+                           onchange="toggleTodo({{ todo.id }})"
+                           id="todo-{{ todo.id }}">
+                    <label for="todo-{{ todo.id }}"></label>
+                </div>
+                <div class="todo-info">
+                    <h3 class="todo-title {% if todo.completed %}strike{% endif %}">{{ todo.title }}</h3>
+                    {% if todo.description %}
+                    <p class="todo-description">{{ todo.description|truncatewords:20 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="todo-meta">
+                <span class="priority-badge priority-{{ todo.priority }}">
+                    {% if todo.priority == 'high' %}🔴{% elif todo.priority == 'medium' %}🟡{% else %}🟢{% endif %}
+                    {{ todo.get_priority_display }}
+                </span>
+                <span class="date-created">Created: {{ todo.created_at|date:"M d, Y" }}</span>
+                {% if todo.due_date %}
+                <span class="due-date">Due: {{ todo.due_date|date:"M d, Y" }}</span>
+                {% endif %}
+            </div>
+
+            <div class="todo-actions">
+                <a href="{% url 'edit_todo' todo.id %}" class="btn btn-edit">Edit</a>
+                <a href="{% url 'delete_todo' todo.id %}" class="btn btn-delete">Delete</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h2>No todos yet!</h2>
+        <p>Start by creating your first todo. Click the button below to get started.</p>
+        <a href="{% url 'add_todo' %}" class="btn btn-primary btn-lg">Create Your First Todo</a>
+    </div>
+{% endif %}
+
+<script>
+function toggleTodo(todoId) {
+    fetch(`/toggle/${todoId}/`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': '{{ csrf_token }}',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function filterTodos(priority) {
+    // Simple client-side filtering
+    const cards = document.querySelectorAll('.todo-card');
+    cards.forEach(card => {
+        if (priority === 'completed') {
+            card.style.display = card.classList.contains('completed') ? 'block' : 'none';
+        } else if (priority === 'all') {
+            card.style.display = 'block';
+        } else {
+            card.style.display = card.classList.contains(`priority-${priority}`) ? 'block' : 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

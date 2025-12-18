@@ -11,7 +11,9 @@ SECRET_KEY = 'django-insecure-your-secret-key-change-this-in-production'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['https://todo-list-r1st.onrender.com/add/']
+ALLOWED_HOSTS = ['todo-list-r1st.onrender.com','localhost','127.0.0.1',]
+
+CSRF_TRUSTED_ORIGINS = [ "https://todo-list-r1st.onrender.com" ]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -87,4 +89,5 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
